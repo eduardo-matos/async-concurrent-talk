@@ -10,3 +10,4 @@ parserOptions:
   sourceType: module
 rules:
   semi: 1
+  no-constant-condition: 0
