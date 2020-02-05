@@ -1,0 +1,10 @@
+{
+  "name": "async-concurr",
+  "version": "1.0.0",
+  "description": "Examples on how to deal with async/concurrent code",
+  "scripts": {
+    "test": "echo \"Sorry for that\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Eduardo Matos",
+}
