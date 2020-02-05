@@ -6,4 +6,5 @@ module.exports = {
   MSG_COUNT_TO_BE_QUEUED: argv.msgCountToBeQueued || 1000,
   MIN_DELAY: argv.minDelay || 100,
   MAX_DELAY: argv.maxDelay || 1000,
+  CONCURRENCY: argv.concurrency || 1,
 };

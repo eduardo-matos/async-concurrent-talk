@@ -4,13 +4,14 @@ const {
   RABBITMQ_CONNECTION_URL,
   MIN_DELAY,
   MAX_DELAY,
+  CONCURRENCY,
 } = require('./config');
 
 async function main() {
   const conn = await amqp.connect(RABBITMQ_CONNECTION_URL);
   const channel = await conn.createChannel();
   await channel.assertQueue(RABBITMQ_QUEUE_NAME);
-  await channel.prefetch(1);
+  await channel.prefetch(CONCURRENCY);
 
   console.log('Ready to consume messages...');
   channel.consume(RABBITMQ_QUEUE_NAME, async (rawMsg) => {
