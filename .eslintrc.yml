@@ -8,4 +8,5 @@ globals:
 parserOptions:
   ecmaVersion: 2018
   sourceType: module
-rules: {}
+rules:
+  semi: 1
