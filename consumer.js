@@ -24,10 +24,16 @@ async function main() {
     messagesBeingProcessed += 1;
 
     await sleep(random(MIN_DELAY, MAX_DELAY)); // simulate slow process
-    await db.query('INSERT INTO dummy (name) VALUES (?);', {
-      replacements: [[rawMsg.content.toString()]],
+
+    const names = JSON.parse(rawMsg.content.toString());
+
+    const insertsPromises = names.map(name => db.query('INSERT INTO dummy (name) VALUES (?);', {
+      replacements: [[name]],
       type: Sequelize.QueryTypes.INSERT,
-    });
+    }));
+
+    await Promise.all(insertsPromises);
+
     channel.ack(rawMsg);
     console.log(`Processed message "${rawMsg.content.toString()}"!`);
 

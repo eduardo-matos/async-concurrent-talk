@@ -4,6 +4,7 @@ const {
   RABBITMQ_CONNECTION_URL,
   RABBITMQ_QUEUE_NAME,
   MSG_COUNT_TO_BE_QUEUED,
+  CHUNK_SIZE,
 } = require('./config');
 
 async function main() {
@@ -11,17 +12,35 @@ async function main() {
   const channel = await conn.createChannel();
   await channel.assertQueue(RABBITMQ_QUEUE_NAME);
 
-  console.log(`Enqueueing ${MSG_COUNT_TO_BE_QUEUED} messages...`);
-  for (let i = 0; i < MSG_COUNT_TO_BE_QUEUED; i += 1) {
-    channel.sendToQueue(
-      RABBITMQ_QUEUE_NAME,
-      Buffer.from(`${faker.name.firstName()} ${faker.name.lastName()}`),
-    );
-  }
+  const chunks = chunkfy(generateNames(MSG_COUNT_TO_BE_QUEUED), CHUNK_SIZE);
+
+  console.log(`Enqueueing ${chunks.length} messages...`);
+  chunks.forEach(chunk => channel.sendToQueue(
+    RABBITMQ_QUEUE_NAME,
+    Buffer.from(JSON.stringify(chunk)),
+  ));
+
   console.log('Messages enqueued!');
 
   await channel.close();
   await conn.close();
+}
+
+function chunkfy(array, chunkSize){
+  var index = 0;
+  var arrayLength = array.length;
+  var tempArray = [];
+
+  for (index = 0; index < arrayLength; index += chunkSize) {
+      const myChunk = array.slice(index, index + chunkSize);
+      tempArray.push(myChunk);
+  }
+
+  return tempArray;
+}
+
+function generateNames(count) {
+  return Array(count).fill('').map(() => `${faker.name.firstName()} ${faker.name.lastName()}`);
 }
 
 main();
