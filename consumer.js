@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const uuid = require('uuid');
 const amqp = require('amqplib');
+const async = require('async');
 const db = require('./database');
 const {
   RABBITMQ_QUEUE_NAME,
@@ -23,21 +24,26 @@ async function main() {
   channel.consume(RABBITMQ_QUEUE_NAME, async (rawMsg) => {
     messagesBeingProcessed += 1;
 
-    await sleep(random(MIN_DELAY, MAX_DELAY)); // simulate slow process
-
     const names = JSON.parse(rawMsg.content.toString());
 
-    const insertsPromises = names.map(name => db.query('INSERT INTO dummy (name) VALUES (?);', {
-      replacements: [[name]],
-      type: Sequelize.QueryTypes.INSERT,
-    }));
+    const queue = async.queue(async (name) => {
+      await sleep(random(MIN_DELAY, MAX_DELAY)); // simulate slow insert
 
-    await Promise.all(insertsPromises);
+      await db.query('INSERT INTO dummy (name) VALUES (?);', {
+        replacements: [[name]],
+        type: Sequelize.QueryTypes.INSERT,
+      });
+      console.log(`Inserted "${name}"`);
+    }, 1);
 
-    channel.ack(rawMsg);
-    console.log(`Processed message "${rawMsg.content.toString()}"!`);
+    names.map(name => queue.push(name));
 
-    messagesBeingProcessed -= 1;
+    await queue.drain(() => {
+      channel.ack(rawMsg);
+      console.log(`Entire message processed!`);
+
+      messagesBeingProcessed -= 1;
+    });
   }, { consumerTag });
 
   process.on('SIGTERM', async () => {
