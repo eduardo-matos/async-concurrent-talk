@@ -8,5 +8,6 @@ module.exports = {
   MIN_DELAY: argv.minDelay || 100,
   MAX_DELAY: argv.maxDelay || 1000,
   CONCURRENCY: argv.concurrency || 1,
+  DB_INSERT_CONCURRENCY: argv.dbInsertConcurrency || 1,
   DB_URL: argv.dbUrl || 'sqlite::memory:',
 };

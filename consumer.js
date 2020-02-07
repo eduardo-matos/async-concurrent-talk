@@ -9,6 +9,7 @@ const {
   MIN_DELAY,
   MAX_DELAY,
   CONCURRENCY,
+  DB_INSERT_CONCURRENCY,
 } = require('./config');
 
 async function main() {
@@ -34,7 +35,7 @@ async function main() {
         type: Sequelize.QueryTypes.INSERT,
       });
       console.log(`Inserted "${name}"`);
-    }, 1);
+    }, DB_INSERT_CONCURRENCY);
 
     names.map(name => queue.push(name));
 
